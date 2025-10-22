@@ -63,8 +63,49 @@ pip install -r requirements.txt
 - openpyxl - Excel file reading
 - usaddress - Intelligent address parsing
 - rapidfuzz - Fuzzy string matching for duplicates
+- tkinterdnd2 - Drag-and-drop support for GUI (optional)
 
-## 🚀 Usage
+## 🖥️ GUI Application (Recommended for Teams!)
+
+### For Non-Technical Users
+
+We've created a simple drag-and-drop GUI so your team doesn't need to use the command line!
+
+**Windows:**
+1. Double-click `launch_gui.bat`
+2. Drag and drop your Excel file (or click Browse)
+3. Adjust options if needed
+4. Click "Clean Data"
+5. Done! Import the CSV into BCC Bulk Mailer
+
+**Mac/Linux:**
+1. First time: Open Terminal and run `chmod +x launch_gui.sh`
+2. Double-click `launch_gui.sh` (or run `./launch_gui.sh` in Terminal)
+3. Drag and drop your Excel file
+4. Click "Clean Data"
+5. Done!
+
+### GUI Features
+
+- 📂 **Drag & Drop** - Just drop your Excel file onto the window
+- ⚙️ **Visual Options** - Slider for fuzzy matching threshold
+- 📊 **Live Progress** - See what's happening in real-time
+- 📄 **Built-in Report** - View results directly in the app
+- 🎨 **User-Friendly** - No command-line knowledge needed!
+
+![GUI Screenshot](https://via.placeholder.com/800x600?text=BCC+Bulk+Mailer+GUI)
+
+### First-Time Setup (One Person Does This Once)
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Then share the folder with your team
+# Everyone can just double-click the launcher!
+```
+
+## 🚀 Command-Line Usage (For Advanced Users)
 
 ### Basic Usage
 
@@ -400,6 +441,7 @@ Your threshold might be too low. Try increasing it: `--fuzzy-threshold 90`
 
 ## 🆕 What's New in Enhanced Edition
 
+- ✨ **GUI Application** - Drag-and-drop interface for non-technical users!
 - ✨ usaddress library integration for professional address parsing
 - ✨ Fuzzy duplicate matching (catches typos and variations)
 - ✨ Detailed processing reports saved automatically
@@ -409,6 +451,7 @@ Your threshold might be too low. Try increasing it: `--fuzzy-threshold 90`
 - ✨ Comprehensive statistics tracking
 - ✨ Warning system for data quality issues
 - ✨ Command-line options for fuzzy threshold control
+- ✨ One-click launchers for Windows and Mac/Linux
 
 ## 📄 License
 
