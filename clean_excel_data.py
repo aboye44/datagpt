@@ -151,6 +151,7 @@ COLUMN_MAPPING = {
     'lname': 'LastName', 'surname': 'LastName', 'family_name': 'LastName',
     'familyname': 'LastName', 'name': 'FullName', 'full_name': 'FullName',
     'fullname': 'FullName', 'contact': 'FullName', 'contact_name': 'FullName',
+    'address_name': 'FullName',  # Common in property management systems
 
     # Company variations
     'company': 'Company', 'business': 'Company', 'organization': 'Company',
@@ -158,11 +159,12 @@ COLUMN_MAPPING = {
     'firm': 'Company', 'business': 'Company',
 
     # Address variations
-    'address': 'Address1', 'address1': 'Address1', 'address_1': 'Address1',
+    'address': 'Unit', 'address1': 'Address1', 'address_1': 'Address1',
     'street': 'Address1', 'street_address': 'Address1', 'streetaddress': 'Address1',
     'addr': 'Address1', 'addr1': 'Address1', 'address_line_1': 'Address1',
+    'full_address': '_FullAddressToParse', # Special: needs parsing
     'address2': 'Address2', 'address_2': 'Address2', 'apt': 'Address2',
-    'suite': 'Address2', 'unit': 'Address2', 'address_line_2': 'Address2',
+    'suite': 'Address2', 'unit': 'Unit', 'address_line_2': 'Address2',
 
     # City variations
     'city': 'City', 'town': 'City', 'municipality': 'City',
@@ -623,6 +625,31 @@ def parse_messy_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.copy()
 
+    # Handle special "_FullAddressToParse" column (from "Full Address" in input)
+    if '_FullAddressToParse' in df.columns:
+        print("Detected 'Full Address' column - parsing addresses...")
+
+        parsed_addresses = []
+        for idx, addr_string in df['_FullAddressToParse'].items():
+            if pd.notna(addr_string) and str(addr_string).strip():
+                parsed = parse_combined_address_regex(str(addr_string))
+                parsed_addresses.append(parsed)
+            else:
+                parsed_addresses.append({
+                    'FullName': '', 'Company': '', 'Address1': '', 'Address2': '',
+                    'City': '', 'State': '', 'ZIP': '', 'ZIP4': '', 'Phone': '', 'Email': ''
+                })
+
+        # Add parsed columns to dataframe
+        for key in ['Address1', 'Address2', 'City', 'State', 'ZIP', 'ZIP4', 'Phone', 'Email']:
+            if key not in df.columns:
+                df[key] = [p[key] for p in parsed_addresses]
+
+        # Drop the temporary column
+        df = df.drop(columns=['_FullAddressToParse'])
+        stats.combined_fields_parsed = len(df)
+        print(f"Parsed {len(df)} addresses from 'Full Address' column")
+
     # Check if we have very few columns - might indicate combined data
     if len(df.columns) <= 2:
         print("Detected possible combined data format - attempting to parse...")
@@ -690,6 +717,28 @@ def clean_and_validate(df: pd.DataFrame) -> pd.DataFrame:
     for col in df.select_dtypes(include=['object']).columns:
         df[col] = df[col].astype(str).str.strip()
         df[col] = df[col].replace('nan', '')
+
+    # Handle Unit column (from property management systems)
+    if 'Unit' in df.columns:
+        print("Incorporating unit numbers into Address2...")
+        for idx, unit in df['Unit'].items():
+            if unit and unit != '':
+                # Format unit with # prefix if not already there
+                unit_formatted = f"#{unit}" if not str(unit).startswith('#') else str(unit)
+
+                # Add to Address2, or create Address2 if it doesn't exist
+                if 'Address2' not in df.columns:
+                    df['Address2'] = ''
+
+                # Prepend unit to existing Address2 if present, otherwise just use unit
+                current_addr2 = df.at[idx, 'Address2'] if pd.notna(df.at[idx, 'Address2']) and df.at[idx, 'Address2'] != '' else ''
+                if current_addr2:
+                    df.at[idx, 'Address2'] = f"{unit_formatted} {current_addr2}"
+                else:
+                    df.at[idx, 'Address2'] = unit_formatted
+
+        # Drop Unit column after incorporating it
+        df = df.drop(columns=['Unit'])
 
     # Normalize State
     if 'State' in df.columns:
