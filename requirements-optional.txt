@@ -1,0 +1,12 @@
+# Optional dependencies for advanced features
+# Only install if you have Microsoft C++ Build Tools installed on Windows
+# or on Mac/Linux where building from source works out of the box
+
+usaddress>=0.5.10
+
+# Installation instructions:
+# Windows: Install Microsoft C++ Build Tools first from:
+#   https://visualstudio.microsoft.com/visual-cpp-build-tools/
+# Then run: pip install -r requirements-optional.txt
+#
+# Mac/Linux: Just run: pip install -r requirements-optional.txt
